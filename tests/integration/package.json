@@ -1,0 +1,53 @@
+{
+  "name": "boarding-house-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for Boarding House Management System",
+  "type": "module",
+  "scripts": {
+    "test": "jest --runInBand --verbose",
+    "test:api": "jest api-integration.test.js --runInBand --verbose",
+    "test:frontend": "playwright test frontend-integration.test.js",
+    "test:realtime": "jest realtime-integration.test.js --runInBand --verbose",
+    "test:all": "npm run test:api && npm run test:realtime && npm run test:frontend",
+    "test:watch": "jest --watch --runInBand",
+    "test:coverage": "jest --coverage --runInBand",
+    "setup": "node setup.js",
+    "teardown": "node teardown.js"
+  },
+  "keywords": [
+    "integration-tests",
+    "boarding-house",
+    "api-testing",
+    "frontend-testing",
+    "realtime-testing"
+  ],
+  "author": "Boarding House Monitor Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "jest": "^29.7.0",
+    "axios": "^1.6.0",
+    "socket.io-client": "^4.7.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000,
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "collectCoverageFrom": [
+      "**/*.test.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "verbose": true,
+    "detectOpenHandles": true,
+    "forceExit": true
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  }
+}
