@@ -157,9 +157,11 @@ app.use('*', (req, res) => {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
+// Socket.IO authentication middleware
+io.use(socketHandlers.authenticateSocket);
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-  logger.info(`Socket connected: ${socket.id}`);
   socketHandlers.handleConnection(socket, io);
 });
 
