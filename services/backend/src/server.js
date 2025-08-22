@@ -34,8 +34,9 @@ const inventoryRoutes = require('./routes/inventory');
 const userRoutes = require('./routes/users');
 const healthRoutes = require('./routes/health');
 
-// Import socket handlers
+// Import socket handlers and services
 const socketHandlers = require('./sockets/handlers');
+const realtimeService = require('./services/realtimeService');
 
 const app = express();
 const server = http.createServer(app);
@@ -157,6 +158,9 @@ app.use('*', (req, res) => {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
+// Initialize real-time service
+realtimeService.initialize(io);
+
 // Socket.IO authentication middleware
 io.use(socketHandlers.authenticateSocket);
 
@@ -180,6 +184,10 @@ const gracefulShutdown = async (signal) => {
       // Close Redis connection
       await redis.disconnect();
       logger.info('Redis connection closed');
+
+      // Cleanup real-time service
+      await realtimeService.cleanup();
+      logger.info('Real-time service cleaned up');
       
       logger.info('Graceful shutdown completed');
       process.exit(0);

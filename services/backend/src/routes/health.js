@@ -8,6 +8,8 @@ const database = require('../config/database');
 const redis = require('../config/redis');
 const config = require('../config/config');
 const logger = require('../config/logger');
+const cacheService = require('../services/cacheService');
+const realtimeService = require('../services/realtimeService');
 
 const router = express.Router();
 
@@ -197,11 +199,17 @@ router.get('/redis', async (req, res) => {
 /**
  * System metrics endpoint
  */
-router.get('/metrics', (req, res) => {
+router.get('/metrics', async (req, res) => {
   try {
     const memUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
-    
+
+    // Get cache statistics
+    const cacheStats = await cacheService.getCacheStats();
+
+    // Get real-time statistics
+    const realtimeStats = realtimeService.getRealtimeStats();
+
     const metrics = {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -215,6 +223,8 @@ router.get('/metrics', (req, res) => {
         user: cpuUsage.user,
         system: cpuUsage.system
       },
+      cache: cacheStats,
+      realtime: realtimeStats,
       eventLoop: {
         delay: 0 // Would need additional library for accurate measurement
       }
@@ -225,6 +235,26 @@ router.get('/metrics', (req, res) => {
     logger.error('Metrics error:', error);
     res.status(500).json({
       error: 'Failed to retrieve metrics',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * Real-time status endpoint
+ */
+router.get('/realtime', (req, res) => {
+  try {
+    const stats = realtimeService.getRealtimeStats();
+    res.json({
+      status: stats.connected ? 'connected' : 'disconnected',
+      ...stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('Real-time status error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve real-time status',
       timestamp: new Date().toISOString()
     });
   }
